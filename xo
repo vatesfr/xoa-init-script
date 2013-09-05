@@ -198,8 +198,29 @@ case "$1" in
 	esac
 	;;
   'update')
-	echo "Updating XO-Server: " && cd /root/xo-server && git pull
-	echo "Updating XO-Werver: " && cd /root/xo-web && git pull
+	log_daemon_msg 'Updating XOA init script'
+	if (cd /root/xoa-init-script && git pull --ff-only)
+	then
+		log_end_msg 0
+	else
+		log_end_msg 1
+	fi
+
+	log_daemon_msg 'Updating XO-Server'
+	if (cd /root/xo-server && git pull --ff-only && npm install)
+	then
+		log_end_msg 0
+	else
+		log_end_msg 1
+	fi
+
+	log_daemon_msg 'Updating XO-Web'
+	if (cd /root/xo-web && git pull --ff-only)
+	then
+		log_end_msg 0
+	else
+		log_end_msg 1
+	fi
 	;;
   *)
 	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
