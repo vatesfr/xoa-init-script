@@ -207,7 +207,7 @@ case "$1" in
 	fi
 
 	log_daemon_msg 'Updating XO-Server'
-	if (cd /root/xo-server && git pull --ff-only && npm install)
+	if (cd /root/xo-server && git pull --ff-only && HOME=/tmp npm install --quiet)
 	then
 		log_end_msg 0
 	else
