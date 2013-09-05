@@ -199,7 +199,7 @@ case "$1" in
 	;;
   'update')
 	log_daemon_msg 'Updating XOA init script'
-	if (cd /root/xoa-init-script && git pull --ff-only)
+	if (cd /root/xoa-init-script && git pull --quiet --ff-only)
 	then
 		log_end_msg 0
 	else
@@ -207,7 +207,7 @@ case "$1" in
 	fi
 
 	log_daemon_msg 'Updating XO-Server'
-	if (cd /root/xo-server && git pull --ff-only && HOME=/tmp npm install --quiet)
+	if (cd /root/xo-server && git pull --quiet --ff-only && HOME=/tmp npm install --quiet)
 	then
 		log_end_msg 0
 	else
@@ -215,7 +215,7 @@ case "$1" in
 	fi
 
 	log_daemon_msg 'Updating XO-Web'
-	if (cd /root/xo-web && git pull --ff-only)
+	if (cd /root/xo-web && git pull --quiet --ff-only)
 	then
 		log_end_msg 0
 	else
