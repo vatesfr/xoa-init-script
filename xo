@@ -37,13 +37,14 @@ LOGFILE="/var/log/$NAME"
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
-_bower_install()
-(
-	# Avoids cluttering root.
-	HOME=/tmp
+# Some tools require a HOME (e.g. grunt).
+HOME=/tmp
+export HOME
 
+_bower_install()
+{
 	bower install --quiet --allow-root
-)
+}
 
 _git_pull()
 {
@@ -56,16 +57,13 @@ _grunt_build()
 }
 
 _npm_install()
-(
-	# Avoids cluttering /root.
-	HOME=/tmp
-
+{
 	npm \
 		${http_proxy:+--proxy="$http_proxy"} \
 		${https_proxy:+--https-proxy="$https_proxy"} \
 		install \
 		--loglevel error
-)
+}
 
 _is_running()
 {
