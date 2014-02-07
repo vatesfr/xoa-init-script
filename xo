@@ -37,6 +37,36 @@ LOGFILE="/var/log/$NAME"
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
+_bower_install()
+(
+	# Avoids cluttering root.
+	HOME=/tmp
+
+	bower install --quiet
+)
+
+_git_pull()
+{
+	git pull --quiet --ff-only
+}
+
+_grunt_build()
+{
+	grunt build > /dev/null
+}
+
+_npm_install()
+(
+	# Avoids cluttering /root.
+	HOME=/tmp
+
+	npm \
+		${http_proxy:+--proxy="$http_proxy"} \
+		${https_proxy:+--https-proxy="$https_proxy"} \
+		install \
+		--loglevel error
+)
+
 _is_running()
 {
 	local pid
@@ -199,15 +229,26 @@ case "$1" in
 	;;
   'update')
 	log_daemon_msg 'Updating XOA init script'
-	if (cd /root/xoa-init-script && git pull --quiet --ff-only)
+	if (
+		set -e
+		cd /root/xoa-init-script
+		_git_pull
+	)
 	then
 		log_end_msg 0
+
+		# FIXME: If the script has been updated it should rerun
+		# itself.
 	else
 		log_end_msg 1
 	fi
 
 	log_daemon_msg 'Updating XO-Server'
-	if (cd /root/xo-server && git pull --quiet --ff-only && HOME=/tmp npm ${http_proxy:+--proxy="$http_proxy"} ${https_proxy:+--https-proxy="$https_proxy"} install --loglevel error)
+	if (
+		cd /root/xo-server
+		_git_pull
+		_npm_install
+	)
 	then
 		log_end_msg 0
 	else
@@ -215,7 +256,14 @@ case "$1" in
 	fi
 
 	log_daemon_msg 'Updating XO-Web'
-	if (cd /root/xo-web && git pull --quiet --ff-only)
+	if (
+		set -e
+		cd /root/xo-web
+		_git_pull
+		_npm_install
+		_bower_install
+		_grunt_build
+	)
 	then
 		log_end_msg 0
 	else
