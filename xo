@@ -42,7 +42,7 @@ _bower_install()
 	# Avoids cluttering root.
 	HOME=/tmp
 
-	bower install --quiet
+	bower install --quiet --allow-root
 )
 
 _git_pull()
