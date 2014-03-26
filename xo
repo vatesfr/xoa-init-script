@@ -41,19 +41,14 @@ LOGFILE="/var/log/$NAME"
 HOME=/tmp
 export HOME
 
-_bower_install()
-{
-	bower install --quiet --allow-root
-}
-
 _git_pull()
 {
 	git pull --quiet --ff-only
 }
 
-_grunt_build()
+_gulp()
 {
-	grunt build > /dev/null
+	./gulp build --production > /dev/null
 }
 
 _npm_install()
@@ -259,8 +254,7 @@ case "$1" in
 		cd /root/xo-web
 		_git_pull
 		_npm_install
-		_bower_install
-		_grunt_build
+		_gulp
 	)
 	then
 		log_end_msg 0
