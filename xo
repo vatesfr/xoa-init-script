@@ -53,6 +53,9 @@ _gulp()
 
 _npm_install()
 {
+	# Removes all installed modules to avoid problems.
+	rm --force --recursive node_modules
+
 	npm \
 		${http_proxy:+--proxy="$http_proxy"} \
 		${https_proxy:+--https-proxy="$https_proxy"} \
