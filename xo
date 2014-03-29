@@ -1,12 +1,12 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:		  xo
-# Required-Start:	$all
-# Required-Stop:	 $local_fs $remote_fs $syslog $named $network
-# Default-Start:	 2 3 4 5
-# Default-Stop:	  0 1 6
+# Provides:          xo
+# Required-Start:    $all
+# Required-Stop:     $local_fs $remote_fs $syslog $named $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
 # Short-Description: start and stop XO server
-# Description:	   XO is a web gui for XAPI hosts
+# Description:       XO is a web gui for XAPI hosts
 ### END INIT INFO
 
 # Author: Julien Fontanet <julien.fontanet@vates.fr>
@@ -43,58 +43,58 @@ export HOME
 
 _git_pull()
 {
-	git pull --quiet --ff-only
+  git pull --quiet --ff-only
 }
 
 _gulp()
 {
-	./gulp build --production > /dev/null
+  ./gulp build --production > /dev/null
 }
 
 _npm_install()
 {
-	# Removes all installed modules to avoid problems.
-	rm --force --recursive node_modules
+  # Removes all installed modules to avoid problems.
+  rm --force --recursive node_modules
 
-	npm \
-		${http_proxy:+--proxy="$http_proxy"} \
-		${https_proxy:+--https-proxy="$https_proxy"} \
-		install \
-		--loglevel error
+  npm \
+    ${http_proxy:+--proxy="$http_proxy"} \
+    ${https_proxy:+--https-proxy="$https_proxy"} \
+    install \
+    --loglevel error
 }
 
 _is_running()
 {
-	local pid
+  local pid
 
-	[ -f "$PIDFILE" ] || return 1
+  [ -f "$PIDFILE" ] || return 1
 
-	pid=$(cat "$PIDFILE")
-	kill -0 "$pid" 2> /dev/null >&2
+  pid=$(cat "$PIDFILE")
+  kill -0 "$pid" 2> /dev/null >&2
 }
 
 # _wait_for <cmd> [<timeout>]
 _wait_for()
 {
-	local i
+  local i
 
-	if [ $# -eq 2 ]
-	then
-		i=$2
-	else
-		i=-1
-	fi
+  if [ $# -eq 2 ]
+  then
+    i=$2
+  else
+    i=-1
+  fi
 
-	while [ "$i" -ne 0 ]
-	do
-		if $cmd
-		then
-			return
-		fi
-		sleep 1
-	done
+  while [ "$i" -ne 0 ]
+  do
+    if $cmd
+    then
+      return
+    fi
+    sleep 1
+  done
 
-	return 1
+  return 1
 }
 
 #
@@ -106,24 +106,24 @@ _wait_for()
 #   2 if daemon could not be started
 do_start()
 {
-	local pid
+  local pid
 
-	_is_running && return 1
+  _is_running && return 1
 
-	printf '%s\n' '' \
-		'----------------------------------------' \
-		"$(date +'%Y-%m-%d %H:%M:%S')" \
-		'----------------------------------------' >> "$LOGFILE"
+  printf '%s\n' '' \
+    '----------------------------------------' \
+    "$(date +'%Y-%m-%d %H:%M:%S')" \
+    '----------------------------------------' >> "$LOGFILE"
 
-	_daemon() { "$DAEMON" $DAEMON_ARGS 2>> "$LOGFILE" >&2 & }
-	if ! _daemon
-	then
-		echo "$?"
-		return 2
-	fi
+  _daemon() { "$DAEMON" $DAEMON_ARGS 2>> "$LOGFILE" >&2 & }
+  if ! _daemon
+  then
+    echo "$?"
+    return 2
+  fi
 
-	pid=$!
-	echo "$pid" > "$PIDFILE"
+  pid=$!
+  echo "$pid" > "$PIDFILE"
 }
 
 #
@@ -136,18 +136,18 @@ do_start()
 #   other if a failure occurred
 do_stop()
 {
-	local pid
+  local pid
 
-	_is_running || return 1
+  _is_running || return 1
 
-	pid=$(cat "$PIDFILE")
-	_terminated() { ! kill -0 "$pid"; }
+  pid=$(cat "$PIDFILE")
+  _terminated() { ! kill -0 "$pid"; }
 
-	kill "$pid"
-	_wait_for _terminated 30 && return
+  kill "$pid"
+  _wait_for _terminated 30 && return
 
-	kill -KILL 15 "$pid"
-	_wait_for _terminated 15 || return 2
+  kill -KILL 15 "$pid"
+  _wait_for _terminated 15 || return 2
 }
 
 #
@@ -158,116 +158,116 @@ do_stop()
 #   1 if daemon was stopped
 do_reload()
 {
-	local pid
+  local pid
 
-	_is_running || return 1
+  _is_running || return 1
 
-	pid=$(cat "$PIDFILE")
-	kill -HUP "$pid"
+  pid=$(cat "$PIDFILE")
+  kill -HUP "$pid"
 }
 
 case "$1" in
   start)
-	[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
-	do_start
-	RETVAL=$?
-	case "$?" in
-		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-	esac
-	;;
+    [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+    do_start
+    RETVAL=$?
+    case "$?" in
+      0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+      2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
   stop)
-	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
-	do_stop
-	case "$?" in
-		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-	esac
-	;;
+    [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+    do_stop
+    case "$?" in
+      0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+      2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
   status)
-	if _is_running
-	then
-		log_success_msg "$NAME is running"
-	else
-		log_failure_msg "$NAME is not running"
-	fi
-	;;
+    if _is_running
+    then
+      log_success_msg "$NAME is running"
+    else
+      log_failure_msg "$NAME is not running"
+    fi
+    ;;
   #reload|force-reload)
-	#
-	# If do_reload() is not implemented then leave this commented out
-	# and leave 'force-reload' as an alias for 'restart'.
-	#
-	#log_daemon_msg "Reloading $DESC" "$NAME"
-	#do_reload
-	#log_end_msg $?
-	#;;
+    #
+    # If do_reload() is not implemented then leave this commented out
+    # and leave 'force-reload' as an alias for 'restart'.
+    #
+    #log_daemon_msg "Reloading $DESC" "$NAME"
+    #do_reload
+    #log_end_msg $?
+    #;;
   restart|force-reload)
-	#
-	# If the "reload" option is implemented then remove the
-	# 'force-reload' alias
-	#
-	log_daemon_msg "Restarting $DESC" "$NAME"
-	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) log_end_msg 0 ;;
-			1) log_end_msg 1 ;; # Old process is still running
-			*) log_end_msg 1 ;; # Failed to start
-		esac
-		;;
-	  *)
-		# Failed to stop
-		log_end_msg 1
-		;;
-	esac
-	;;
-  'update')
-	log_daemon_msg 'Updating XOA init script'
-	if (
-		set -e
-		cd /root/xoa-init-script
-		_git_pull
-	)
-	then
-		log_end_msg 0
+    #
+    # If the "reload" option is implemented then remove the
+    # 'force-reload' alias
+    #
+    log_daemon_msg "Restarting $DESC" "$NAME"
+    do_stop
+    case "$?" in
+      0|1)
+      do_start
+        case "$?" in
+          0) log_end_msg 0 ;;
+          1) log_end_msg 1 ;; # Old process is still running
+          *) log_end_msg 1 ;; # Failed to start
+        esac
+        ;;
+      *)
+        # Failed to stop
+        log_end_msg 1
+        ;;
+    esac
+    ;;
+  update)
+    log_daemon_msg 'Updating XOA init script'
+    if (
+      set -e
+      cd /root/xoa-init-script
+      _git_pull
+    )
+    then
+      log_end_msg 0
 
-		# FIXME: If the script has been updated it should rerun
-		# itself.
-	else
-		log_end_msg 1
-	fi
+      # FIXME: If the script has been updated it should rerun
+      # itself.
+    else
+      log_end_msg 1
+    fi
 
-	log_daemon_msg 'Updating XO-Server'
-	if (
-		cd /root/xo-server
-		_git_pull
-		_npm_install
-	)
-	then
-		log_end_msg 0
-	else
-		log_end_msg 1
-	fi
+    log_daemon_msg 'Updating XO-Server'
+    if (
+      cd /root/xo-server
+      _git_pull
+      _npm_install
+    )
+    then
+      log_end_msg 0
+    else
+      log_end_msg 1
+    fi
 
-	log_daemon_msg 'Updating XO-Web'
-	if (
-		set -e
-		cd /root/xo-web
-		_git_pull
-		_npm_install
-		_gulp
-	)
-	then
-		log_end_msg 0
-	else
-		log_end_msg 1
-	fi
-	;;
+    log_daemon_msg 'Updating XO-Web'
+    if (
+      set -e
+      cd /root/xo-web
+      _git_pull
+      _npm_install
+      _gulp
+    )
+    then
+      log_end_msg 0
+    else
+      log_end_msg 1
+    fi
+    ;;
   *)
-	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
-	exit 3
-	;;
+    #echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+    echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+    exit 3
+    ;;
 esac
