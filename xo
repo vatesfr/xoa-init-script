@@ -74,16 +74,21 @@ _npm_install()
     --loglevel error
 }
 
+# _is_running PID
 _is_running()
 {
-  local pid
-
-  [ -f "$PIDFILE" ] || return 1
-
-  pid=$(cat "$PIDFILE")
-  kill -0 "$pid" 2> /dev/null >&2
+  kill -0 "$1" 2> /dev/null >&2
 }
 
+_is_xo_running()
+{
+  [ -f "$PIDFILE" ] || return 1
+  _is_running "$(cat "$PIDFILE")"
+}
+
+# Runs a command each seconds until it succeed or the timeout is
+# reached.
+#
 # _wait_for <cmd> [<timeout>]
 _wait_for()
 {
@@ -103,6 +108,7 @@ _wait_for()
       return
     fi
     sleep 1
+    i=$((i - 1))
   done
 
   return 1
@@ -119,7 +125,7 @@ do_start()
 {
   local pid
 
-  _is_running && return 1
+  _is_xo_running && return 1
 
   printf '%s\n' '' \
     '----------------------------------------' \
@@ -149,16 +155,19 @@ do_stop()
 {
   local pid
 
-  _is_running || return 1
-
   pid=$(cat "$PIDFILE")
-  _terminated() { ! kill -0 "$pid"; }
+
+  _is_running "$pid" || return 1
+
+  _is_xo_not_running() {
+    ! _is_running "$pid"
+  }
 
   kill "$pid"
-  _wait_for _terminated 30 && return
+  _wait_for _is_not_running 30 && return
 
   kill -KILL 15 "$pid"
-  _wait_for _terminated 15 || return 2
+  _wait_for _is_not_running 15 || return 2
 }
 
 #
@@ -171,7 +180,7 @@ do_reload()
 {
   local pid
 
-  _is_running || return 1
+  _is_xo_running || return 1
 
   pid=$(cat "$PIDFILE")
   kill -HUP "$pid"
@@ -196,7 +205,7 @@ case "$1" in
     esac
     ;;
   status)
-    if _is_running
+    if _is_xo_running
     then
       log_success_msg "$NAME is running"
     else
