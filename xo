@@ -37,6 +37,17 @@ LOGFILE="/var/log/$NAME"
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
+# Override log_failure_msg() because it should have a return value of
+# 1.
+log_failure_msg()
+{
+  if [ -n "${1:-}" ]
+  then
+    log_begin_msg $@ "..."
+  fi
+  log_end_msg 1
+}
+
 # Some tools require a HOME (e.g. grunt).
 HOME=/tmp
 export HOME
